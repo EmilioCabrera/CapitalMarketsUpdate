@@ -1,0 +1,896 @@
+---
+html_document: null
+author: ''
+date: 4/23/2021
+output:
+  html_document:
+    toc: yes
+    toc_depth: 3
+title: |  
+  ![](logo.jpg){#id .class width=75% height=75%}  
+  <font size="24">Debt Capital Markets Update</font>
+always_allow_html: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(plotly)
+library(openxlsx)
+library(kableExtra)
+library(DT)
+library(knitr)
+```
+
+```{r Reading In Data, echo=FALSE, message=FALSE, warning=FALSE, include=FALSE}
+
+#IG SUPPLY DATA
+supply <- read.xlsx("Market Update (4.19.21).xlsx",
+                    sheet = 3,
+                    startRow = 369,
+                    colNames = FALSE,
+                    cols = c(2,3,4,5)
+                    )
+
+colnames(supply) <- c("date",
+                      "week",
+                      "amt",
+                      "numDeals")
+
+supply$date <- convertToDate(supply$date)
+
+#if (nrow(supply) %% 2 != 0) {
+#  supply <- supply %>% 
+#    slice(1:nrow(HY_net_fund_flow) -1 ) }
+
+supply2 <- data.frame(week1 = supply$week[c(TRUE, FALSE)],
+                      week2 = supply$week[c(FALSE, TRUE)])
+
+
+
+
+
+# IG LIPPER FUND FLOW
+IG_net_fund_flow <- read.xlsx("Market Update (4.19.21).xlsx",
+                              sheet = 1,
+                              startRow = 54,
+                              colNames = FALSE,
+                              cols = c(2,3,4)
+                              )
+
+colnames(IG_net_fund_flow) <- c("date",
+                                "week",
+                                "flow")
+
+IG_net_fund_flow <- IG_net_fund_flow %>%
+  mutate(flow_type = case_when(flow >= 0 ~ "Inflow", flow < 0 ~ "Outflow"))
+
+if (nrow(IG_net_fund_flow) %% 2 != 0) {
+  IG_net_fund_flow <- IG_net_fund_flow %>% slice(1:nrow(IG_net_fund_flow)-1) }
+
+IGNFF2 <- data.frame(week1 = IG_net_fund_flow$week[c(TRUE, FALSE)],
+                     week2 = IG_net_fund_flow$week[c(FALSE, TRUE)])
+
+
+
+
+
+# HY LIPPER FUND FLOW
+HY_net_fund_flow <- read.xlsx("Market Update (4.19.21).xlsx",
+                              sheet = 1,
+                              startRow = 54,
+                              colNames = FALSE,
+                              cols = c(2,3,5)
+                              )
+
+colnames(HY_net_fund_flow) <- c("date",
+                                "week",
+                                "flow")
+
+HY_net_fund_flow <- HY_net_fund_flow %>%
+  mutate(flow_type = case_when(flow >= 0 ~ "Inflow", flow < 0 ~ "Outflow"))
+
+if (nrow(HY_net_fund_flow) %% 2 != 0) {
+  HY_net_fund_flow <- HY_net_fund_flow %>% slice(1:nrow(HY_net_fund_flow)-1) }
+
+HYNFF2 <- data.frame(week1 = HY_net_fund_flow$week[c(TRUE, FALSE)],
+                     week2 = HY_net_fund_flow$week[c(FALSE, TRUE)])
+
+
+
+#TIGHTENING & WEEKLY NICS / OSR
+
+stats <- read.xlsx("Market Update (4.19.21).xlsx",
+                   sheet = 7,
+                   rows = (69:121),
+                   colNames = FALSE,
+                   cols = c(2,3,4,5))
+
+colnames(stats) <- c("date",
+                     "tightening",
+                     "nic",
+                     "osr")
+
+if (nrow(stats) %% 2 != 0) {
+  stats <- stats %>% slice(1:nrow(stats) -1) }
+
+stats2 <- data.frame(date1 = stats$date[c(TRUE, FALSE)],
+                     date2 = stats$date[c(FALSE, TRUE)])
+
+
+
+
+# MONTHLY OSR
+osr <- read.xlsx("Market Update (4.19.21).xlsx",
+                 sheet = 8,
+                 rows = (18:29),
+                 colNames = FALSE,
+                 cols = c(1,4,5)
+                 )
+
+colnames(osr) <- c("month", "avg_osr", "weighted_avg_osr")
+
+osr$month <- convertToDate(osr$month)
+
+osr$month <- format(osr$month, format = "%b-%y")
+
+
+
+# MONTHLY NICS
+nic <- read.xlsx("Market Update (4.19.21).xlsx",
+                 sheet = 8,
+                 rows = (18:29),
+                 colNames = FALSE,
+                 cols = c(1,2,3))
+
+colnames(nic) <- c("month",
+                   "avg_nic",
+                   "weighted_avg_nic")
+
+nic$month <- convertToDate(nic$month)
+
+nic$month <- format(nic$month, format = "%b-%y")
+
+
+
+# IG CDX INDEX
+IG_index <- read.xlsx("Market Update (4.19.21).xlsx",
+                      sheet = 2,
+                      rows = (326:586),
+                      colNames = FALSE,
+                      cols = c(1,2,3,4)
+                      )
+
+colnames(IG_index) <- c("date",
+                        "last_price",
+                        "high",
+                        "low")
+
+IG_index$date <- convertToDate(IG_index$date)
+
+
+
+
+# HY CDX INDEX
+HY_index <- read.xlsx("Market Update (4.19.21).xlsx",
+                      sheet = 2,
+                      rows = (326:586),
+                      colNames = FALSE,
+                      cols = c(1,5,6,7))
+
+colnames(HY_index) <- c("date",
+                        "last_price",
+                        "high",
+                        "low")
+
+HY_index$date <- convertToDate(HY_index$date)
+
+
+
+
+# GLOBAL YIELDS
+wust <- read.xlsx("Market Update (4.19.21).xlsx",
+                  sheet = 4,
+                  rows = (333:594),
+                  colNames = FALSE,
+                  cols = c(1,2, 3, 4, 5, 6))
+
+colnames(wust) <- c("date",
+                    "german",
+                    "spanish",
+                    "italian",
+                    "us",
+                    "chinese")
+
+wust$date <- convertToDate(wust$date)
+
+
+
+
+# UST YIELDS
+ust <- read.xlsx("Market Update (4.19.21).xlsx",
+                 sheet = 5,
+                 rows = (313:591),
+                 colNames = FALSE)
+
+ust$X1 <- convertToDate(ust$X1)
+
+
+
+
+# NEXT WEEK ECONOMIC DATA
+econ_data <- read.xlsx("Market Update (4.19.21).xlsx",
+                       sheet = 6,
+                       rows = (2:8),
+                       cols = c(1:5)
+                       )
+
+colnames(econ_data) = c("Date",
+                        "Event",
+                        "Period",
+                        "Survey",
+                        "Prior")
+
+
+# WEEKLY DEAL LIST
+
+table <- read.xlsx("Market Update (4.19.21).xlsx",
+                   sheet = 9,
+                   rows = (1:38),  
+                   cols = c(1:13)
+                   )
+
+colnames(table)[1] <- "DATE"
+
+table$DATE <- convertToDate(table$DATE)
+
+table$Maturity <- convertToDate(table$Maturity)
+
+table$DATE <- format(table$DATE, format = "%A, %B %d")
+
+colnames(table) <- c("Date",
+                     "Issuer",
+                     "Rating",
+                     "Size",
+                     "Tenor",
+                     "Rank",
+                     "Coupon",
+                     "Maturity",
+                     "IPT(bps)",
+                     "Guidance(bps)",
+                     "Priced(bps)",
+                     "IPT - Priced",
+                     "Avg.Nic(bps)")
+
+table$Coupon <- as.numeric(table$Coupon)
+
+table %>% mutate(Coupon = round(Coupon, digits = 4))
+
+
+
+
+# FORMATTING FOR GRAPHS 
+f <- list(
+  family = "cambria",
+  size = 12,
+  color = 'black'
+  )
+
+```
+
+# INVESTMENT GRADE ISSUANCE VOLUME
+
+## Supply
+
+Last week, ex-SSA supply came in at **$25.13 billion** priced across **11 deals**. Issuance is expected to remain steady this week as more companies emerge from their self-imposed blackout periods with average estimates calling for $25 to $30 billion.
+
+* Total ex-SSA issuance for 2021 is currently **6% ahead** of last year's levels at this point
+
+* Average size of the deal for 2021 is now $1.81 billion (in 2020, at this point of the year, it was $1.50 billion)
+
+The largest transactions for the week were:
+
+* **7-Eleven** $10.95 billion 8-part transaction comprised of 1.5-year floating rate notes and 2, 3, 5, 7, 10, 20 and 30-year fixed rate notes
+
+* **JPMorgan Chase** $5 billion 2-part deal including 6NC5 and 11NC10-year fixed-to-floating rate notes
+
+* **Credit Suisse** $4 billion 3-part deal consisting of 3-year fixed and floating rate notes and 6NC5-year fixed-to-floating rate notes
+
+Corporate investment grade total issuance for the year is at $125 billion priced across 69 deals. The graph below summarizes weekly issuance in the US investment grade market since January 2020.
+
+
+```{r,echo=FALSE, message=FALSE, warning=FALSE}
+
+y1 <- list(range = c(0,120),
+           tickfont = list(color = "black"),
+           side = "left",
+           title = "Amount ($bn)"
+           )
+
+y2 <- list(range = c(0,60),
+           tickfont = list(color = "black"),
+           overlaying = "y",
+           side = "right",
+           title = "# of Deals",
+           automargin = T
+           )
+
+supply <- supply %>% slice(1:57)
+
+supply_plot <- plot_ly(width = 900,
+                       supply)
+
+supply_plot <- supply_plot %>% add_trace(supply,
+                                         x = ~week,
+                                         y = ~amt,
+                                         type = "bar",
+                                         name = "Amt ($bn)",
+                                         yaxis = "y1")
+
+supply_plot <- supply_plot %>% add_trace(supply,
+                                         x = ~week,
+                                         y = ~numDeals,
+                                         type = "scatter",
+                                         mode = "lines+markers",
+                                         yaxis = "y2",
+                                         name = "# of Deals")
+
+supply_plot <- supply_plot %>% layout(
+  title = "", yaxis = y1, yaxis2 = y2,
+  xaxis = list(title = "",
+               autotick = FALSE,
+               tickangle = 270,
+               tickmode = "array"),
+               #tickvals = c(supply2$week2)),
+               # type = 'category',
+               # categoryorder = "array",
+               # categoryarray = supply$week),
+  font = f,
+  legend = list(orientation = 'h',
+                x = .4,
+                y = -0.6,
+                font = list(size=14)
+                )
+)
+
+supply_plot
+```
+
+## Demand
+
+According to Lipper, last week, **IG bond funds reported a net inflow of $2.077 billion. HY bond funds saw a net outflow of $3.589 billion** (IG funds are at $ 98.960 billion of net inflows for the year, with HY funds at $32.362 billion of net inflows).
+
+<br>
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+
+x <- list(title = "",
+          tickangle = 270,
+          autotick = FALSE,
+          type = 'category',
+          tickmode = "array",
+          categoryarray = c(IG_net_fund_flow$week),
+          tickvals = c(IGNFF2$week2)
+          )
+
+y <- list( title = "Amount ($bn)")
+
+IG_fund_flow_plot <- plot_ly(width = 900,
+                             IG_net_fund_flow,
+                             x = ~week,
+                             y = ~flow,
+                             type = 'bar',
+                             color = ~flow_type,
+                             colors = c("#3bb841", "#b83b3b"))
+
+IG_fund_flow_plot <- IG_fund_flow_plot %>%
+  layout(xaxis = x,
+         yaxis = y,
+         title = 'Investment Grade Net Fund Flows',
+         font = f,
+         legend = list(orientation = 'h',
+                       x = .4,
+                       y = -0.35,
+                       font = list(size=14)
+                       )
+         )
+
+IG_fund_flow_plot
+```
+
+<br>
+
+```{r, echo = FALSE, message = FALSE, warning = FALSE}
+
+x <- list(
+  title = "",
+  tickangle = "270",
+  autotick = FALSE,
+  type = 'category',
+  tickmode = "array",
+  categoryarray = c(HY_net_fund_flow$week),
+  tickvals = c(HYNFF2$week2))
+
+y <- list(  title = "Amount ($bn)")
+
+HY_fund_flow_plot <- plot_ly(width = 900,
+                             HY_net_fund_flow,
+                             x = ~week,
+                             y = ~flow,
+                             type = 'bar',
+                             color = ~flow_type,
+                             colors = c("#3bb841", "#b83b3b")
+                             )
+
+HY_fund_flow_plot <- HY_fund_flow_plot %>%
+  layout(xaxis = x,
+         yaxis = y,
+         title = 'High Yield Net Fund Flows',
+         font = f,
+         legend = list(orientation = 'h',
+                       x = .4,
+                       y = -0.35,
+                       font = list(size=14)
+                       )
+         )
+
+HY_fund_flow_plot
+```
+
+<hr style="border:2px solid gray"> </hr>
+
+# PRICING & PERFORMANCE
+Supply for the last week of January was in line with estimates calling for $425 billion. Volume was driven by 7-Eleven's $10.95 billion transaction, marking the largest deal of the year and bringing January's total to initial estimates of $125 billion. Despite last week's volatility in the secondary market, 7-Eleven's fixed rate tranches tightened by an average of 7 bps as of Friday's close. January's new issue concessions average of -2 bps was the lowest monthly average in a year.
+
+Following are additional metrics for deals priced last week:
+
+* Average New Issue Concession: -2.4 bps
+
+* Average Over Subscription Ratio: 3.81x
+
+* Average Tightening from Initial Pricing Levels: 27 bps
+
+## Pricing Levels
+
+```{r, echo = FALSE, message = FALSE, warning = FALSE}
+
+y1 <- list(tickfont = list(color = "black"),
+           side = "left",
+           title = "Tightening (bps)")
+
+plot <- plot_ly(width = 900,
+                stats)
+
+plot <- plot %>%
+  add_trace(stats,
+            x = ~date,
+            y = ~tightening,
+            type = 'scatter',
+            mode = 'lines+markers',
+            yaxis = "y1",
+            name = "Tightening (IPT to Pricing)",
+            line = list(color = "#3bb841"),
+            marker = list(color = "#3bb841")
+            )
+
+plot <- plot %>% layout(title = "Tightening (IPT to Pricing)",
+                        yaxis = y1,
+                        xaxis = list(title = "",
+                                     tickangle = "270",
+                                     autotick = FALSE,
+                                     type = 'category',
+                                     tickmode = "array",
+                                     categoryarray = c(stats$date),
+                                     tickvals = c(stats2$date2)
+                                     ),
+                        font = f
+                        )
+
+plot <- plot %>% layout(legend = list(orientation = 'h',
+                                      x = 0,
+                                      y = -0.3,
+                                      font = list(size=14)
+                                      )
+                        )
+
+plot
+```
+
+## Oversubscription Ratios
+
+Oversubscription ratios (OSR) average for the month of January closed at 3.02x, while the weighted average was 2.82x.
+
+<br>
+
+```{r,echo=FALSE, message=FALSE, warning=FALSE}
+
+y1 <- list(tickfont = list(color = "black"),
+           side = "left",
+           title = "Order book/Deal Size (OSR)")
+
+plot <- plot_ly(width = 900,
+                height =450,
+                stats)
+
+plot <- plot %>% add_trace(stats,
+                           x = ~date,
+                           y = ~osr,
+                           type = 'bar',
+                           name = "OSR",
+                           yaxis = "y1")
+ 
+plot <- plot %>% layout(
+  title = "Oversubscription Ratios (OSR) - Weekly", yaxis = y1,
+  xaxis = list(title = "",
+               tickangle = "270",
+                autotick = FALSE,
+                type = 'category',
+                tickmode = "array",
+                categoryarray = c(stats$date),
+                tickvals = c(stats2$date2)),
+                font = f
+)
+
+plot <- plot %>% layout(legend = list(orientation = 'h',
+                                      x = 0,
+                                      y = -0.3,
+                                      font = list(size=14)
+                                      )
+                        )
+
+plot
+```
+
+<br>
+
+```{r,echo=FALSE, message=FALSE, warning=FALSE}
+
+# graph
+osr_plot <- plot_ly(
+  width = 900,
+  height = 450,
+  osr,
+  x = ~month,
+  y = ~avg_osr,
+  type = 'bar',
+  name = 'Avg OSR')
+
+osr_plot <- osr_plot %>%
+  add_trace(y = ~weighted_avg_osr,
+            name = 'Wght Avg OSR'
+            )
+
+osr_plot <- osr_plot %>%
+  layout(yaxis = list(title = 'Order Book/Deal Size (OSR)'),
+         barmode = 'group',
+         xaxis = list(tickangle = '0',
+                      autotick = FALSE,
+                      type = 'category',
+                      categoryorder = "array",
+                      categoryarray = osr$month,
+                      title = ""
+                      ),
+         font = f,
+         legend = list(orientation = 'h',
+                       x = .4,
+                       y = -0.075,
+                       font = list(size=14)
+                       ),
+         title = "Oversubscription Ratios (OSR) - Monthly")
+
+osr_plot
+```
+
+## New Issue Concessions
+
+New Issue Concessions (NIC) average for the month of January closed at -2.03 bps, while the weighted average was -1.52 bps.
+
+<br>
+
+```{r,echo=FALSE, message=FALSE, warning=FALSE}
+
+y1 <- list(tickfont = list(color = "black"),
+           side = "left",
+           title = "NIC (bps)")
+
+plot <- plot_ly(width = 900,
+                height = 450,
+                stats)
+
+plot <- plot %>%
+  add_trace(stats,
+            x = ~date,
+            y = ~nic,
+            type = "bar",
+            yaxis = "y1",
+            name = "NIC",
+            color = I("#ff7f0e")
+            )
+
+plot <- plot %>% layout(
+  title = "New Issue Concessions (NIC) - Weekly", yaxis = y1,
+  xaxis = list(title = "",
+               tickangle = "270",
+                autotick = FALSE,
+                type = 'category',
+                tickmode = "array",
+                categoryarray = c(stats$date),
+                tickvals = c(stats2$date2)),
+                font = f
+)
+
+
+plot <- plot %>%
+  layout(legend = list(orientation = 'h',
+                       x = 0,
+                       y = -0.3,
+                       font = list(size=14)
+                       )
+         )
+
+plot
+```
+
+<br>
+
+```{r, echo = FALSE, message = FALSE, warning = FALSE}
+
+nic_plot <- plot_ly(
+  width = 900,
+  height = 450,
+  nic,
+  x = ~month,
+  y = ~avg_nic,
+  type = 'bar',
+  name = 'Avg NIC')
+
+nic_plot <- nic_plot %>%
+  add_trace(y = ~weighted_avg_nic,
+            name = 'Wght Avg NIC')
+
+nic_plot <- nic_plot %>%
+  layout(yaxis = list(title = 'NIC (bps)',
+                      range = c(-4,10)),
+         barmode = 'group',
+         xaxis = list(tickangle = '0',
+                      autotick = FALSE,
+                      type = 'category',
+                      categoryorder = "array",
+                      categoryarray = nic$month,
+                      title = ""),
+         font = f,
+         legend = list(orientation = 'h',
+                       x = .4,
+                       y = -0.075,
+                       font = list(size=14)
+                       ),
+         title = "New Issue Concessions (NIC) - Monthly")
+
+nic_plot
+```
+
+<hr style="border:2px solid gray"> </hr>
+
+# IG & HY INDEX
+
+The Markit CDX North America IG Index, which tracks 125 equally weighted credit default swaps on IG entities closed **four bps wider** from last week at **56 bps**, while the Markit CDX North America HY Index, which is composed of 100 credit default swaps on HY entities, closed **13 bps wider** for the week at **318 bps**.
+
+<br>
+
+```{r,echo=FALSE, message=FALSE, warning=FALSE}
+
+IG_index_plot <- plot_ly(width = 900,
+                         height=300,
+                         IG_index)
+
+IG_index_plot <- IG_index_plot %>% add_trace(IG_index,
+                         x = ~date,
+                         y = ~last_price,
+                         mode = 'line',
+                         showlegend = F)
+
+IG_index_plot <- IG_index_plot %>%
+  add_trace(IG_index,
+            x= ~date,
+            y= ~high,
+            mode = "line",
+            name = "12M High")
+
+IG_index_plot <- IG_index_plot %>%
+  add_trace(IG_index,
+            x= ~date,
+            y= ~low,
+            mode = "line",
+            name = "12M Low")
+
+IG_index_plot <- IG_index_plot %>%
+  layout(yaxis = list(title = 'Markit IG Index (bps)'),
+         xaxis = list(title = 'Date',                                        
+                      tickangle = -45,
+                      tickformat = '%m/%d/%y',
+                      type = 'date'),
+         barmode = 'group',
+         title = 'Markit CDX IG 5Yr Index',
+         legend = list(orientation = 'h',
+                       x = .4,
+                       y = -0.4,
+                       font = list(size=14)
+                       ),
+         font = f)
+
+IG_index_plot
+
+# need to add data labels for horiz. lines
+```
+
+<br>
+
+```{r,echo=FALSE, message=FALSE, warning=FALSE}
+
+HY_index_plot <- plot_ly(width = 900,
+                         height = 300,
+                         HY_index)
+
+HY_index_plot <- HY_index_plot %>% add_trace(HY_index,
+                         x = ~date,
+                         y = ~last_price,
+                         mode = 'line',
+                         showlegend = F)
+
+HY_index_plot <- HY_index_plot %>%
+  add_trace(HY_index, x= ~date, y= ~high, mode = "line", name = "12M High")
+
+HY_index_plot <- HY_index_plot %>%
+  add_trace(HY_index,
+            x= ~date,
+            y= ~low,
+            mode = "line",
+            name = "12M Low")
+
+HY_index_plot <- HY_index_plot %>% layout(yaxis = list(title = 'Markit HY Index (bps)'),
+                                          xaxis = list(title = 'Date',
+                                                       tickangle = -45,
+                                                       tickformat = '%m/%d/%y',
+                                                       type = 'date'),
+                                          barmode = 'group',
+                                          title = 'Markit CDX HY 5Yr Index',
+                                          legend = list(orientation = 'h',
+                                                        x = .4,
+                                                        y = -0.4,
+                                                        font = list(size=14)
+                                                        ),
+                                          font = f)
+
+HY_index_plot
+
+```
+
+<hr style="border:2px solid gray"> </hr>
+ 
+# US TREASURY RATES
+
+Last Friday, US Treasury yields closed roughly stable versus the previous week. On Friday, yields across the curve fell, erasing what appeared to be a weekly increase amid a 1.9% fall in the S&P 500. Also on Friday, the ECB announced that there was no immediate need to cut interest rates but that the option remained on the table if economic conditions were to worsen. Meanwhile, the 5 to 10-year and 10 to 30-year yield spreads continue to maintain the highest levels in over three years.
+
+
+Following are **UST Yield Differentials** recorded on **January 29, 2020**:
+
+* **30yr to 5yr**: 1.41%  (-1 bps vs the previous week)
+
+* **30yr to 10yr**: 0.76%  (no change vs the previous week)
+
+* **10yr to 5yr**: 0.65%  (no change vs the previous week)
+
+
+The U.S. 10-year Treasury yield closed the week at **1.07%**, two basis point below the previous week's close.
+
+<br>
+
+```{r,echo=FALSE, message=FALSE, warning=FALSE}
+
+wust_plot <- plot_ly(width = 900,wust)
+
+wust_plot <- wust_plot %>% add_trace(wust, x = ~date, y = ~german, mode = 'line', name= "German")
+wust_plot <- wust_plot %>% add_trace(wust, x = ~date, y = ~spanish, mode = 'line', name= "Spanish")
+wust_plot <- wust_plot %>% add_trace(wust, x = ~date, y = ~italian, mode = 'line', name= "Italian")
+wust_plot <- wust_plot %>% add_trace(wust, x = ~date, y = ~us, mode = 'line', name= "US")
+wust_plot <- wust_plot %>% add_trace(wust, x = ~date, y = ~chinese, mode = 'line', name= "Chinese")
+
+wust_plot <- wust_plot %>% layout(yaxis = list(title = '% Yield'),
+                        xaxis = list(tickangle = -45,
+                        tick0 = 0,
+                        tickformat = '%m/%d/%y',
+                        type = 'date',
+                        title = "Date"),
+                        title = 'Global Govt 10-Year Yields',
+                        legend = list(orientation = 'h',
+                                      x = .2,
+                                      y = -0.25,
+                                      font = list(size=14)
+                                      ),
+                        font = f)
+
+wust_plot
+```
+
+<br>
+
+```{r,echo=FALSE, message=FALSE, warning=FALSE}
+
+ust_plot <- plot_ly(width = 900, height = 350,ust)
+
+ust_plot <- ust_plot %>% add_trace(ust, x = ~X1, y = ~X10, mode = 'line', name= "[30Yr-10Yr]")
+
+ust_plot <- ust_plot %>% add_trace(ust, x = ~X1, y = ~X11, mode = 'line', name= "[30Yr-5Yr]")
+
+ust_plot <- ust_plot %>% add_trace(ust, x = ~X1, y = ~X12, mode = 'line', name= "[10Yr-5Yr]")
+
+
+ust_plot <- ust_plot %>% layout(yaxis = list(title = '% Spread'),
+                                xaxis = list(tickangle = -45,
+                                             tick0 = 0,
+                                             tickformat = '%m/%d/%y',
+                                             type = 'date',
+                                             title = "Date"),
+                                title = 'US Treasury Spread Differentials',
+                                legend = list(orientation = 'h',
+                                              x = .25,
+                                              y = -0.25,
+                                              font = list(size=14)
+                                              ),
+                                font = f)
+
+ust_plot
+```
+ 
+<hr style="border:2px solid gray"> </hr>
+ 
+# THE WEEK AHEAD
+
+According to Bloomberg, following is the relevant economic data for this week:
+
+```{r,echo=FALSE, message=FALSE, warning=FALSE}
+
+kable_econ <- kbl(econ_data)
+
+kable_econ %>%
+  kable_paper("striped") %>%
+  column_spec(1, bold = T) %>%
+  kable_classic(html_font = "Cambria")
+```
+
+# SUMMARY OF LAST WEEK'S IG DEAL ACTIVITY
+
+```{r,echo=FALSE, message=FALSE, warning=FALSE}
+
+datatable(table,
+          rownames = FALSE,
+          filter = 'top',
+          options = list(responsive = TRUE,
+                         autoWidth = TRUE,
+                         scrollX = T,
+                         columnDefs = list( list (className = 'dt-center',
+                                                targets = "_all")
+                                           )
+                         )
+          )
+```
+
+
+```
+CSS:
+
+body {
+font-size: 10pt;
+font-family: Cambria,Georgia,serif;
+}
+
+headers {
+font-size: 14pt;
+font-family: Cambria,Georgia,serif;
+}
+
+#TOC {
+font-size:12pt;
+font-family: Cambria,Georgia,serif;
+}
+```

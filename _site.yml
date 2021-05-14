@@ -1,0 +1,8 @@
+name: "Cabrera's IG Market Update"
+navbar:
+  title: "Cabrera's IG Market Update"
+  left:
+    - text: "About"
+      href: index.html
+    - text: "IG Market Update"
+      href: IG-Market-Update.html
