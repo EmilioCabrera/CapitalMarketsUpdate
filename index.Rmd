@@ -1,25 +1,15 @@
 ---
-title: "About Our Report & Disclaimer"
+title: "About & Disclaimer Page"
 author: "Emilio Cabrera"
 output: html_document
 ---
+
+**ABOUT CABRERA'S REPORT**
 
 Cabrera’s new Market Update Platform is produced using R software and has built-in GitHub integration which allows for interactive graphics, tables, and reporting. 
 For questions or additional information regarding the report please visit our website below. 
 
 [CABRERA CAPITAL MARKETS WEBSITE LINK](https://www.cabreracapital.com/)
-
-**DISCLAIMER**
-
-This electronic mail message and any attachments contain information that is intended for the exclusive use of the individual or the entity to whom it is addressed and may contain information that is proprietary and/or confidential. If you are not the intended recipient, please notify the sender, by e-mail or telephone of any unintended recipients and delete the original message without making any copies.
-
-Information contained in this publication is based on data obtained from sources we deem to be reliable, however, it is not guaranteed as to accuracy and does not purport to be complete. Nothing contained in this publication is intended to be a recommendation of a specific security or company nor is any of the information contained herein intended to constitute an analysis of any company or security reasonably sufficient to form the basis for any investment decision.
-
-Sources: Bloomberg, IFR, Informa Global Markets, Internal Cabrera, WSJ, Bond Radar, Dow Jones Newswire, LCDNews, Market News International, Prospect News, Standard & Poor's Ratings Services, Fitch Inside Credit, Thomson Reuters
-
-[C] 2021 Cabrera Capital Markets, LLC 10 South LaSalle Street, Chicago, Illinois, 60603
-
-Additional information is available upon request.
 
 **ABOUT GITHUB**
 
@@ -34,3 +24,16 @@ R provides a wide variety of statistical (linear and nonlinear modeling, classic
 One of R’s strengths is the ease with which well-designed publication-quality plots can be produced, including mathematical symbols and formulas where needed. Great care has been taken over the defaults for the minor design choices in graphics, but the user retains full control.
 
 R is available as Free Software under the terms of the Free Software Foundation’s GNU General Public License in source code form. It compiles and runs on a wide variety of UNIX platforms and similar systems (including FreeBSD and Linux), Windows and MacOS.
+
+
+**DISCLAIMER**
+
+This electronic mail message and any attachments contain information that is intended for the exclusive use of the individual or the entity to whom it is addressed and may contain information that is proprietary and/or confidential. If you are not the intended recipient, please notify the sender, by e-mail or telephone of any unintended recipients and delete the original message without making any copies.
+
+Information contained in this publication is based on data obtained from sources we deem to be reliable, however, it is not guaranteed as to accuracy and does not purport to be complete. Nothing contained in this publication is intended to be a recommendation of a specific security or company nor is any of the information contained herein intended to constitute an analysis of any company or security reasonably sufficient to form the basis for any investment decision.
+
+Sources: Bloomberg, IFR, Informa Global Markets, Internal Cabrera, WSJ, Bond Radar, Dow Jones Newswire, LCDNews, Market News International, Prospect News, Standard & Poor's Ratings Services, Fitch Inside Credit, Thomson Reuters
+
+[C] 2021 Cabrera Capital Markets, LLC 10 South LaSalle Street, Chicago, Illinois, 60603
+
+Additional information is available upon request.
