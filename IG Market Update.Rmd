@@ -6,7 +6,7 @@ output:
   html_document:
     toc: yes
     toc_depth: 3
-    css: styles.css
+   css: styles.css
 title: |  
   ![](logo.jpg){#id .class width=75% height=75%}  
   <font size="24">Debt Capital Markets Update</font>
@@ -877,7 +877,8 @@ datatable(table,
 ```
 
 
-```{CSS, echo = FALSE}
+CSS:
+
 body {
 font-size: 10pt;
 font-family: Cambria,Georgia,serif;
@@ -892,5 +893,4 @@ font-family: Cambria,Georgia,serif;
 font-size:12pt;
 font-family: Cambria,Georgia,serif;
 }
-```
 
