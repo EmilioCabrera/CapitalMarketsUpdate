@@ -6,6 +6,7 @@ output:
   html_document:
     toc: yes
     toc_depth: 3
+    css: styles.css
 title: |  
   ![](logo.jpg){#id .class width=75% height=75%}  
   <font size="24">Debt Capital Markets Update</font>
@@ -39,9 +40,9 @@ colnames(supply) <- c("date",
 
 supply$date <- convertToDate(supply$date)
 
-#if (nrow(supply) %% 2 != 0) {
-#  supply <- supply %>% 
-#    slice(1:nrow(HY_net_fund_flow) -1 ) }
+if (nrow(supply) %% 2 != 0) {
+  supply <- supply %>% 
+    slice(1:nrow(HY_net_fund_flow) -1 ) }
 
 supply2 <- data.frame(week1 = supply$week[c(TRUE, FALSE)],
                       week2 = supply$week[c(FALSE, TRUE)])
@@ -876,9 +877,7 @@ datatable(table,
 ```
 
 
-```
-CSS:
-
+```{CSS, echo = FALSE}
 body {
 font-size: 10pt;
 font-family: Cambria,Georgia,serif;
@@ -894,3 +893,4 @@ font-size:12pt;
 font-family: Cambria,Georgia,serif;
 }
 ```
+
